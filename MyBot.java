@@ -472,6 +472,173 @@ public class MyBot {
     	return ret;
     }
     
+    public String TScore(){
+    	int[] possibleMoves = new int[34];
+    	int[][] tempBoard = new int[20][10];
+    	
+    	//no rot, 3 len
+    	for(int i = 0; i < 8; i++){
+    		int tempMax = 0, tempMaxIdx= 0;
+    		for(int j = 0; j < 3; j++){
+    			if(height[i+j]>tempMax){
+    				tempMax = height[i+j];
+    				tempMaxIdx = j;
+    			}
+    		}
+    		
+    		tempBoard = board;
+    		tempBoard[i][tempMax+1] = 1;
+    		tempBoard[i+1][tempMax+1] = 1;
+    		tempBoard[i+1][tempMax+2] = 1;
+    		tempBoard[i+2][tempMax+1] = 1;
+    		
+    		possibleMoves[i] = getScore(tempBoard);
+    	}
+    	//1 rot, 2 len
+    	for(int i = 0; i< 9; i++){
+    		int tempMax = 0, tempMaxIdx= 0;
+    		for(int j = 0; j < 2; j++){
+    			if(height[i+j]>tempMax){
+    				tempMax = height[i+j];
+    				tempMaxIdx = j;
+    			}
+    		}
+    		
+    		tempBoard = board;
+    		if(tempMaxIdx == 1){
+    			tempBoard[i][tempMax] = 1;
+    			tempBoard[i][tempMax+1] = 1;
+    			tempBoard[i][tempMax+2] = 1;
+    			tempBoard[i+1][tempMax+1] = 1;
+    		}
+    		else{
+    			tempBoard[i][tempMax+1] = 1;
+    			tempBoard[i][tempMax+2] = 1;
+    			tempBoard[i][tempMax+3] = 1;
+    			tempBoard[i+1][tempMax+2] = 1;
+    		}
+    		
+    		possibleMoves[i+8] = getScore(tempBoard);
+    	}
+    	//2 rot, 3 len
+    	for(int i = 0; i< 8; i++){
+    		int tempMax = 0, tempMaxIdx= 0;
+    		for(int j = 0; j < 3; j++){
+    			if(height[i+j]>=tempMax){
+    				tempMax = height[i+j];
+    				tempMaxIdx = j;
+    			}
+    		}
+    		
+    		tempBoard = board;
+    		if(tempMaxIdx == 0 || tempMaxIdx == 2){
+    			if(height[i]==height[i+1]){
+    				tempBoard[i][tempMax+2] = 1;
+        			tempBoard[i+1][tempMax+1] = 1;
+        			tempBoard[i+1][tempMax+2] = 1;
+        			tempBoard[i+2][tempMax+2] = 1;
+    			}
+    			else{
+    				tempBoard[i][tempMax+1] = 1;
+        			tempBoard[i+1][tempMax] = 1;
+        			tempBoard[i+1][tempMax+1] = 1;
+        			tempBoard[i+2][tempMax+1] = 1;
+    			}
+    		}
+    		else{
+    			tempBoard[i][tempMax+2] = 1;
+    			tempBoard[i+1][tempMax+1] = 1;
+    			tempBoard[i+1][tempMax+2] = 1;
+    			tempBoard[i+2][tempMax+2] = 1;
+    		}
+    		possibleMoves[i+17] = getScore(tempBoard);
+    	}
+    	//3 rot, 2 len
+    	for(int i = 0; i< 9; i++){
+    		int tempMax = 0, tempMaxIdx= 0, tempMaxPos = 0;
+    		for(int j = 0; j < 2; j++){
+    			if(height[i+j]>=tempMax){
+    				tempMax = height[i+j];
+    				tempMaxIdx = j;
+    				tempMaxPos = i+j;
+    			}
+    		}
+    		
+    		tempBoard = board;
+    		if(tempMaxIdx == 0){
+    			tempBoard[i][tempMax+2] = 1;
+    			tempBoard[i+1][tempMax] = 1;
+    			tempBoard[i+1][tempMax+1] = 1;
+    			tempBoard[i+1][tempMax+2] = 1;
+    		}
+    		else {
+    			tempBoard[i][tempMax+1] = 1;
+    			tempBoard[i+1][tempMax-1] = 1;
+    			tempBoard[i+1][tempMax] = 1;
+    			tempBoard[i+1][tempMax+1] = 1;
+    		}
+
+    		possibleMoves[i+25] = getScore(tempBoard);
+    	}
+    	
+    	//best move
+    	int max = 0;
+    	int nextMove = 0;
+    	for(int i = 0; i < possibleMoves.length; i++){
+    		if(possibleMoves[i] > max){
+    			max = possibleMoves[i];
+    			nextMove = i;
+    		}
+    	}
+    	
+    	//find move
+    	String ret = "";
+    	if(nextMove < 8){
+    		if(nextMove > 4){
+    			ret = getRights(nextMove, 4);
+    		}
+    		else if(nextMove < 4){
+    			ret = getLefts(nextMove, 4);
+    		}
+    		else
+    			ret = "drop";
+    	}
+    	else if( nextMove >= 8 && nextMove < 17){
+    		ret += "turnleft,";
+    		if(nextMove > 7 && nextMove < 11){
+    			ret += getLefts(nextMove, 11);
+    		}
+    		else if (nextMove > 11){
+    			ret += getRights(nextMove, 11);
+    		}
+    		else
+    			ret += "drop";
+    	}
+    	else if( nextMove >= 17 && nextMove < 25){
+    		ret += "turnleft,turnleft";
+    		if(nextMove > 16 && nextMove < 20){
+    			ret += getLefts(nextMove, 20);
+    		}
+    		else if (nextMove > 20){
+    			ret += getRights(nextMove, 20);
+    		}
+    		else
+    			ret += "drop";
+    	}
+    	else{
+    		ret += "turnleft,turnleft,turnleft";
+    		if(nextMove > 24 && nextMove < 28){
+    			ret += getLefts(nextMove, 28);
+    		}
+    		else if (nextMove > 28){
+    			ret += getRights(nextMove, 28);
+    		}
+    		else
+    			ret += "drop";
+    	}
+    	return ret;
+    }
+    
     public String SScore(){
     	int[] possibleMoves = new int[17];
     	int[][] tempBoard = new int[20][10];
@@ -486,7 +653,7 @@ public class MyBot {
     		}
     		
     		tempBoard = board;
-    		if(tempMaxIdx==i+2){
+    		if(tempMaxIdx==2){
     			tempBoard[i][tempMax] = 1;
     			tempBoard[i+1][tempMax] = 1;
     			tempBoard[i+1][tempMax+1] = 1;
@@ -509,7 +676,7 @@ public class MyBot {
     			}
     		}
     		tempBoard = board;
-    		if(tempMaxIdx == i){
+    		if(tempMaxIdx == 0){
     			tempBoard[i][tempMax+1] = 1;
     			tempBoard[i][tempMax+2] = 1;
     			tempBoard[i+1][tempMax] = 1;
@@ -572,7 +739,7 @@ public class MyBot {
     		}
     		
     		tempBoard = board;
-    		if(tempMaxIdx==i){
+    		if(tempMaxIdx==0){
     			tempBoard[i][tempMax+1] = 1;
     			tempBoard[i+1][tempMax] = 1;
     			tempBoard[i+1][tempMax+1] = 1;
@@ -589,13 +756,13 @@ public class MyBot {
     	for(int i = 0; i < 9; i++){
     		int tempMax = 0, tempMaxIdx= 0;
     		for(int j = 0; j < 2; j++){
-    			if(height[i+j]>=tempMax){
+    			if(height[i+j]>tempMax){
     				tempMax = height[i+j];
     				tempMaxIdx = j;
     			}
     		}
     		tempBoard = board;
-    		if(tempMaxIdx == i+1){
+    		if(tempMaxIdx == 1){
     			tempBoard[i][tempMax+1] = 1;
     			tempBoard[i][tempMax] = 1;
     			tempBoard[i+1][tempMax+2] = 1;
@@ -732,6 +899,7 @@ public class MyBot {
     		break;
     	case 6:
     		//4 rotations, T
+    		nextMove = TScore();
     		break;
     	case 7:
     		//2 rotations, Z
@@ -756,7 +924,42 @@ public class MyBot {
     		slope[0] = Math.abs(tempHeight[i] - tempHeight[i+1]);
     	}
     	
-    	//find holes
+    	//find holes, for now hole has at least 3 full cells next when one isn't top
+    	int holes = 0;
+    	for(int i = 0; i < tempBoard.length;i++){
+    		for(int j = 0; j < tempBoard[i].length;j++){
+    			if(tempBoard[i][j] == 1)
+    				break;//cell is full, don't care
+    			if(i!=9)
+    				if(tempBoard[i+1][j] == 0)
+    					break;//has a top don't care
+    			int blockCount = 0;
+    			//left full?
+    			if(j!=0){
+    				if(tempBoard[i][j-1]==1)
+    					blockCount++;
+    			}
+    			else
+    				blockCount++;
+    			//right full?
+    			if(j!=9){
+    				if(tempBoard[i][j+1]==1)
+    					blockCount++;
+    			}
+    			else
+    				blockCount++;
+    			//bottom full?
+    			if(i!=0){
+    				if(tempBoard[i-1][j]==1)
+    					blockCount++;
+    			}
+    			else
+    				blockCount++;
+    			
+    			if(blockCount >= 3)
+    				holes++;
+    		}
+    	}
     	
     	//highest cell
     	int h1 = max(tempHeight);
@@ -781,7 +984,7 @@ public class MyBot {
     	
     	//full cells wieghted by altitude
     	
-    	return (int) ((h1*-10 + h2*-1 + h3*-5 + h4*-2));
+    	return (int) ((h1*-10 + h2*-1 + h3*-5 + h4*-2 + holes*-4));
     }
     
     public int max(int[] array){
