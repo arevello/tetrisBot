@@ -930,7 +930,7 @@ public class MyBot {
     		for(int j = 0; j < tempBoard[i].length;j++){
     			if(tempBoard[i][j] == 1)
     				break;//cell is full, don't care
-    			if(i!=9)
+    			if(i!=19)
     				if(tempBoard[i+1][j] == 0)
     					break;//has a top don't care
     			int blockCount = 0;
